@@ -30,6 +30,4 @@ int main (void)
         assert (is_perfect_square (0) == true);
         assert (is_perfect_square (2) == false);
         assert (is_perfect_square (4) == true);
-
-
 }

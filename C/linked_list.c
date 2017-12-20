@@ -51,7 +51,17 @@ struct Node * LL_push (struct LL * list, int val)
 
 struct Node * LL_pop (struct LL * list)
 {
+        assert (list != NULL);
 
+        struct Node * n = list->head;
+        list->head = n->next;
+        list->head->prev = NULL;
+
+        n->next = NULL;
+        n->prev = NULL;
+        list->count--;
+
+        return n;
 }
 
 // -----------------------------------------------------------------------------
@@ -77,14 +87,41 @@ struct Node * LL_queue (struct LL * list, int value)
 
 struct Node * LL_dequeue (struct LL * list)
 {
+        assert (list != NULL);
+        struct Node * n = list->tail;
 
+        list->tail = n->prev;
+        list->tail->next = NULL;
+        n->prev = NULL;
+        n->next = NULL;
+        list->count--;
+
+        return n;
 }
 
 // -----------------------------------------------------------------------------
 
 struct LL * LL_reverse (struct LL * list)
 {
+        assert (list != NULL);
 
+        if (list->head == list->tail) return list;
+
+        struct Node * n = list->head;
+        struct Node * t_tail = list->tail;
+        list->tail = n;
+
+        while (n != NULL) {
+                struct Node * t_prev = n->prev;
+                n->prev = n->next;
+                n->next = t_prev;
+
+                n = n->prev;
+        }
+
+        list->head = t_tail;
+
+        return list;
 }
 
 // -----------------------------------------------------------------------------
@@ -117,6 +154,7 @@ void LL_print (struct LL * list)
                 printf ("[%d]->", conductor->val);
                 conductor = conductor->next;
         }
+        printf ("\n");
 }
 
 // -----------------------------------------------------------------------------
@@ -130,10 +168,29 @@ int main (void)
         assert (LL_push (list, 30) == list->head);
         assert (LL_queue (list, 100) == list->tail);
 
-
         LL_print (list);
 
         assert (LL_count (list) == 4);
+        printf ("Popping...\n");
+        assert (LL_pop (list) != NULL);
+        assert (LL_count (list) == 3);
+
+        LL_print (list);
+
+        printf ("Dequeueing...\n");
+        assert (LL_dequeue (list) != NULL);
+        assert (LL_count (list) == 2);
+
+        LL_print (list);
+
+        printf ("Pushing 1000, 2000, 3000...\n");
+        assert (LL_push (list, 1000) == list->head);
+        assert (LL_push (list, 2000) == list->head);
+        assert (LL_push (list, 3000) == list->head);
+        LL_print (list);
+        printf ("Reversing...\n");
+        assert (LL_reverse (list) != NULL);
+        LL_print (list);
 
         return 0;
 }
