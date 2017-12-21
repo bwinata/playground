@@ -191,11 +191,10 @@ laptop_S tesla =
 
 void structMath()
 {
-    // Cast to pointer
-   // (char *) &(char *)&tesla
-   printf ("Size of tesla keyboard structure = %d\n", (int)sizeof (tesla));
-   printf ("Key value = %c\n", *(char *)((char *)&tesla + sizeof (mouse_S)));
-   printf ("Alternate Key Value = %c\n", *(char *)((char *)&tesla + sizeof (mouse_S) + sizeof (char)));
+        printf ("Key Value = %c\n", *(char *)((keyboard_S *)((char *)&tesla) + 4));
+        printf ("Key Value = %c\n", *(char *)((keyboard_S *)((mouse_S *)&tesla + 1)));
+        printf ("Alternate Key Value = %s\n", ((char *)((keyboard_S *)((char *)&tesla) + 4)) + 1);
+        printf ("Alternate Key value = %c\n", *((char *)((keyboard_S *)((mouse_S *)&tesla + 1)) + 1));
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -387,60 +386,114 @@ bool brakes_activateEmergencyBraking(int32_t* distancePtr, int32_t closureRate)
 //                                 +---------+
 //
 
-typedef enum {
-  STATE_A,
-  STATE_B,
-  STATE_C,
-  FAULT,
+typedef enum _state_ {
+        STATE_A,
+        STATE_B,
+        STATE_C,
+        FAULT
 } state;
 
 state state_machine (int input)
 {
-  static state s = STATE_A;
+        static state current_state = STATE_A;
 
-  switch (s) {
-    case STATE_A:
-      switch (input) {
-        case 2:
-          s = STATE_C;
-          break;
-        case 3:
-          s = STATE_B;
-          break;
-        default:
-          return FAULT;
-      }
-      break;
-    case STATE_B:
-      switch (input) {
-        case 4:
-          s = STATE_A;
-          break;
-        case 6:
-          s = STATE_C;
-          break;
-        default:
-          return FAULT;
-      }
-      break;
-    case STATE_C:
-      switch (input) {
-        case 1:
-          s = STATE_A;
-          break;
-        case 5:
-          s = STATE_B;
-          break;
-        default:
-          return FAULT;
-      }
-      break;
-    default:
-      printf ("Error - System should not be in this state: %d\n", s);
-  }
+        switch (current_state) {
+                case STATE_A:
+                        switch (input) {
+                                case 3:
+                                        current_state = STATE_B;
+                                        break;
+                                case 2:
+                                        current_state = STATE_C;
+                                        break;
+                                default:
+                                        return FAULT;
+                        }
+                        break;
+                case STATE_B:
+                        switch (input) {
+                                case 6:
+                                        current_state = STATE_C;
+                                        break;
+                                case 4: current_state = STATE_A;
+                                        break;
+                                default:
+                                        return FAULT;
+                        }
+                        break;
+                case STATE_C:
+                        switch (input) {
+                                case 1:
+                                        current_state = STATE_A;
+                                        break;
+                                case 5:
+                                        current_state = STATE_B;
+                                        break;
+                                default:
+                                        return FAULT;
+                        }
+                        break;
+                default:
+                        printf ("Invalid state = %d\n", current_state);
 
-  return s;
+        }
+        return current_state;
 }
+
+// typedef enum {
+//   STATE_A,
+//   STATE_B,
+//   STATE_C,
+//   FAULT,
+// } state;
+//
+// state state_machine (int input)
+// {
+//   static state s = STATE_A;
+//
+//   switch (s) {
+//     case STATE_A:
+//       switch (input) {
+//         case 2:
+//           s = STATE_C;
+//           break;
+//         case 3:
+//           s = STATE_B;
+//           break;
+//         default:
+//           return FAULT;
+//       }
+//       break;
+//     case STATE_B:
+//       switch (input) {
+//         case 4:
+//           s = STATE_A;
+//           break;
+//         case 6:
+//           s = STATE_C;
+//           break;
+//         default:
+//           return FAULT;
+//       }
+//       break;
+//     case STATE_C:
+//       switch (input) {
+//         case 1:
+//           s = STATE_A;
+//           break;
+//         case 5:
+//           s = STATE_B;
+//           break;
+//         default:
+//           return FAULT;
+//       }
+//       break;
+//     default:
+//       printf ("Error - System should not be in this state: %d\n", s);
+//   }
+//
+//   return s;
+// }
 
 ////////////////////////////////////////////////////////////////////////////////
 // Use this main to test your code
@@ -451,20 +504,19 @@ int main()
 
 // 3 - 2D Array access via pointers
 
-    arrayMath ();
+    // arrayMath ();
 
 //
     structMath ();
 
 // 7 - Payload nibble swap
-    uint64_t swapped_nibble = payload_nibble_swap (0x0123456789ABCDEF);
-    assert (swapped_nibble == 0x1032547698BADCFE);
+    // uint64_t swapped_nibble = payload_nibble_swap (0x0123456789ABCDEF);
+    // assert (swapped_nibble == 0x1032547698BADCFE);
 
 // 9 - State Machine
     assert (state_machine (3) == STATE_B);
     assert (state_machine (3) == FAULT);
     assert (state_machine (6) == STATE_C);
-
-
+    assert (state_machine (5) == STATE_B);
     return 0;
 }
