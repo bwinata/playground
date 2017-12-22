@@ -159,6 +159,15 @@ void LL_print (struct LL * list)
 
 // -----------------------------------------------------------------------------
 
+void LL_print_reverse (struct Node * n)
+{
+        if (n == NULL) return;
+        LL_print_reverse (n->next);
+        printf ("Value = %d\n", n->val);
+}
+
+// -----------------------------------------------------------------------------
+
 int main (void)
 {
         struct LL * list = LL_create ();
@@ -191,6 +200,8 @@ int main (void)
         printf ("Reversing...\n");
         assert (LL_reverse (list) != NULL);
         LL_print (list);
+
+        LL_print_reverse (list->head);
 
         return 0;
 }
